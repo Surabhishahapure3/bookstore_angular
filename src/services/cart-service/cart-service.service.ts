@@ -10,7 +10,12 @@ import { UserServiceService } from '../user-service/user-service.service';
 export class CartServiceService {
   private cart: any[] = [];
   private wishlist: any[] = [];
+  private wishlistItems: any[] = [];
+  private readonly CART_STORAGE_KEY = 'localCart';
+  private baseUrl = 'http://localhost:3000/api/v1/wishlist';
   private apiUrl = 'http://localhost:3000/api/v1/cart/';
+  private Url = 'http://localhost:3000/api/v1/orders';
+
   // books: any;
   // data:any;
 
@@ -27,18 +32,36 @@ export class CartServiceService {
     });
   }
 
+  
+
+  createOrder(): Observable<any> {
+    return this.http.post<any>(`${this.Url}/`, {}, { headers: this.getHeaders() });
+  }
+
+  getAllOrders(): Observable<any> {
+    return this.http.get<any>(`${this.Url}/`, { headers: this.getHeaders() });
+  }
+
+  updateBackendCart(bookId: string, quantity: number):Observable<any>{
+    return this.http.post<any>(`${this.apiUrl}/updatequantity`,{bookId,quantity},{headers:this.getHeaders()})
+  }
   addToCart(book: any, quantity: number = 1): void {
-    const existingItem = this.cart.find((item) => item._id === book._id);
+    const currentCart = this.getLocalCart();
+    const existingItem = currentCart.find(item => item._id === book._id);
+
     if (existingItem) {
       existingItem.quantity += quantity;
     } else {
-      this.cart.push({ ...book, quantity });
+      currentCart.push({ ...book, quantity });
     }
-    console.log('Cart:', this.cart);
+
+    this.saveCartToStorage(currentCart);
   }
 
   removeFromCart(bookId: string): void {
-    this.cart = this.cart.filter((item) => item._id !== bookId);
+    const currentCart = this.getLocalCart();
+    const updatedCart = currentCart.filter(item => item._id !== bookId);
+    this.saveCartToStorage(updatedCart);
   }
 
   toggleWishlist(book: any): void {
@@ -63,8 +86,17 @@ export class CartServiceService {
     return this.cart;
   }
 
-  getWishlist(): any[] {
-    return this.wishlist;
+  getWishlist(): Observable<any> {
+    if (!this.userService.getToken()) {
+      return of({ data: { books: [] } });
+    }
+    
+    return this.http.get(`${this.baseUrl}`, { headers: this.getHeaders() }).pipe(
+      tap((response: any) => {
+        this.wishlistItems = response.data.books || [];
+      }),
+      catchError(this.handleError('getWishlist', { data: { books: [] } }))
+    );
   }
 
   getCartQuantity(bookId: string): number | null {
@@ -74,22 +106,19 @@ export class CartServiceService {
 
   getBackendCart(): Observable<any[]> {
     return this.http.get<any>(`${this.apiUrl}`, { headers: this.getHeaders() }).pipe(
-      tap(response => {
-        console.log('Backend Cart data:', response);
-        this.syncLocalCartWithBackend(response.data.books || []);
-      }),
-      map(response => response.data.books || []), 
-      catchError(this.handleError<any[]>('getBackendCart', []))
+      map(response => response?.data?.books || []),
+      catchError(error => {
+        console.error('Error fetching backend cart:', error);
+        return of([]);
+      })
     );
   }
 
-  addToBackendCart(book: any, quantity: number = 1): Observable<any> {
-    return this.http.post(`${this.apiUrl}${book._id}`, {}, { headers: this.getHeaders() }).pipe(
-      tap(response => {
-        console.log('Book added to backend cart:', response);
-        this.addToCart(book, quantity);
-      }),
-      catchError(this.handleError<any>('addToBackendCart'))
+  private addToBackendCart(book: any, quantity: number): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}${book._id}`, 
+      { quantity }, 
+      { headers: this.getHeaders() }
     );
   }
 
@@ -104,45 +133,90 @@ export class CartServiceService {
   }
 
   updateBackendCartItemQuantity(bookId: string, quantity: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/updatequantity`, { bookId, quantity }, { headers: this.getHeaders() }).pipe(
+    return this.http.post(
+      `${this.apiUrl}/updatequantity`, 
+      { bookId, quantity }, 
+      { headers: this.getHeaders() }
+    ).pipe(
       tap(response => {
-        console.log('Cart item quantity updated:', response);
-        const item = this.cart.find(i => i._id === bookId);
-        if (item) {
-          item.quantity = quantity;
-        }
+        // Don't update local cart here - let the loadCart handle it
+        console.log('Backend quantity updated:', response);
       }),
       catchError(this.handleError<any>('updateBackendCartItemQuantity'))
     );
+}
+
+syncLocalCartWithBackend(backendCart: any[]): void {
+  console.log('Syncing backend cart to local:', backendCart);
+  
+  // Create a map of items by ID for easier lookup
+  const itemMap = new Map();
+  
+  // Process backend items first
+  backendCart.forEach(backendItem => {
+    itemMap.set(backendItem._id, { ...backendItem });
+  });
+  
+  // Process local items, combining quantities if item exists in backend
+  this.cart.forEach(localItem => {
+    if (itemMap.has(localItem._id)) {
+      // If item exists in both carts, add quantities
+      const existingItem = itemMap.get(localItem._id);
+      existingItem.quantity += localItem.quantity;
+      itemMap.set(localItem._id, existingItem);
+    } else {
+      // If item only exists locally, add it to the map
+      itemMap.set(localItem._id, { ...localItem });
+    }
+  });
+  
+  // Convert map back to array
+  this.cart = Array.from(itemMap.values());
+  console.log('Final merged cart:', this.cart);
+}
+
+
+syncBackendCartWithLocal(): Observable<any> {
+  const localCart = this.getCart();
+  console.log('Syncing local cart to backend:', localCart);
+
+  if (localCart.length === 0) {
+    return of([]);
   }
 
-  syncLocalCartWithBackend(backendCart: any[]): void {
-    // Clear the local cart
-    this.cart = [];
-
-    // Add all items from the backend cart to the local cart
-    backendCart.forEach(item => {
-      this.addToCart(item, item.quantity);
-    });
-
-    console.log('Local cart synced with backend:', this.cart);
-  }
-
-  syncBackendCartWithLocal(): Observable<any> {
-    // First, clear the backend cart
-    return this.http.delete(`${this.apiUrl}`, { headers: this.getHeaders() }).pipe(
-      tap(() => console.log('Backend cart cleared')),
-      // Then, add all items from the local cart to the backend
-      switchMap(() => {
-        const addOperations = this.cart.map(item => 
-          this.addToBackendCart(item, item.quantity)
-        );
-        return forkJoin(addOperations);
-      }),
-      catchError(this.handleError<any>('syncBackendCartWithLocal'))
+  // Create an array of observables for updating each item
+  const operations = localCart.map(item => {
+    return this.updateOrAddToBackendCart(item).pipe(
+      catchError(error => {
+        console.error(`Error syncing item ${item._id}:`, error);
+        return of(null);
+      })
     );
-  }
+  });
 
+  return forkJoin(operations).pipe(
+    tap(() => console.log('Cart sync completed')),
+    catchError(this.handleError<any>('syncBackendCartWithLocal'))
+  );
+}
+
+private updateOrAddToBackendCart(item: any): Observable<any> {
+  return this.getBackendCart().pipe(
+    switchMap(backendCart => {
+      const existingItem = backendCart.find((bi: any) => bi._id === item._id);
+      if (existingItem) {
+        // If item exists, update quantity
+        return this.updateBackendCartItemQuantity(
+          item._id, 
+          existingItem.quantity + item.quantity
+        );
+      } else {
+        // If item doesn't exist, add it
+        return this.addToBackendCart(item, item.quantity);
+      }
+    })
+  );
+}
   private mergeBackendCart(backendCart: any[]): void {
     if (!Array.isArray(backendCart)) {
       console.error('Backend cart is not an array:', backendCart);
@@ -165,6 +239,69 @@ export class CartServiceService {
       console.error(`${operation} failed: ${error.message}`);
       return of(result as T);
     };
+  }
+
+  updateLocalCartItem(bookId: string, quantity: number): void {
+    const currentCart = this.getLocalCart();
+    const itemIndex = currentCart.findIndex(item => item._id === bookId);
+    
+    if (itemIndex !== -1) {
+      currentCart[itemIndex].quantity = quantity;
+      this.saveCartToStorage(currentCart);
+    }
+  }
+  
+
+
+  /*-----------------------------------------------------------------------------------------------------------------------------------------------*/
+  private loadCartFromStorage(): void {
+    const storedCart = localStorage.getItem(this.CART_STORAGE_KEY);
+    if (storedCart) {
+      try {
+        const parsedCart = JSON.parse(storedCart);
+        this.saveCartToStorage(parsedCart);
+      } catch (e) {
+        console.error('Error parsing stored cart:', e);
+        this.saveCartToStorage([]);
+      }
+    }
+  }
+
+  private saveCartToStorage(cart: any[]): void {
+    localStorage.setItem(this.CART_STORAGE_KEY, JSON.stringify(cart));
+  }
+
+  getLocalCart(): any[] {
+    const storedCart = localStorage.getItem(this.CART_STORAGE_KEY);
+    return storedCart ? JSON.parse(storedCart) : [];
+  }
+
+
+  syncLocalCartToBackend(): Observable<any> {
+    const localCart = this.getLocalCart();
+    if (localCart.length === 0) return of(null);
+
+    const syncOperations = localCart.map(item => 
+      this.addToBackendCart(item, item.quantity).pipe(
+        catchError(error => {
+          console.error(`Error syncing item ${item._id}:`, error);
+          return of(null);
+        })
+      )
+    );
+
+    return forkJoin(syncOperations).pipe(
+      tap(() => {
+        // Clear local storage after successful sync
+        localStorage.removeItem(this.CART_STORAGE_KEY);
+      })
+    );
+  }
+
+  
+
+  clearLocalCart(): void {
+    localStorage.removeItem(this.CART_STORAGE_KEY);
   }
     
 }

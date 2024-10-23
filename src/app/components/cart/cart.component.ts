@@ -4,6 +4,8 @@ import { UserServiceService } from 'src/services/user-service/user-service.servi
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { LoginRegisterComponent } from 'src/app/components/login-register/login-register.component';
 import { Router } from '@angular/router';
+import { finalize, forkJoin } from 'rxjs';
+
 
 @Component({
   selector: 'app-cart',
@@ -12,6 +14,7 @@ import { Router } from '@angular/router';
 })
 export class CartComponent implements OnInit{
   cartItems:any[] = [];
+  isLoading: boolean = false;
   private dialogRef: MatDialogRef<LoginRegisterComponent> | null = null;
   errorMessage: string = '';
 
@@ -20,91 +23,110 @@ export class CartComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    this.cartItems = [...this.cartService.getCart()];
+    // this.cartItems = [...this.cartService.getCart()];
     this.loadCart();
   }
 
   loadCart(): void {
-  const localCart = this.cartService.getCart();
-
-  if (this.userService.getToken()) {
-    this.cartService.getBackendCart().subscribe(
-      backendCart => {
-        // Merge backend and local cart items directly using the spread operator
-        this.cartItems = backendCart.map(backendItem => {
-          const localItem = localCart.find(item => item._id === backendItem._id);
-
-          // If localItem exists, merge the quantities, otherwise return backendItem
-          return localItem ? { ...backendItem, quantity: backendItem.quantity + localItem.quantity } : backendItem;
-        });
-
-        // Add items from local cart that are not present in backend cart
-        const itemsOnlyInLocalCart = localCart.filter(
-          localItem => !backendCart.some(backendItem => backendItem._id === localItem._id)
-        );
-        
-        // Spread the local-only items into the cart
-        this.cartItems = [...this.cartItems, ...itemsOnlyInLocalCart];
-
-        // Display merged cart in console
-        console.log('Merged Cart:', this.cartItems);
-      },
-      error => console.error('Error fetching cart:', error)
-    );
-  } else {
-    // If no token, just use the local cart
-    this.cartItems = localCart;
-    console.log('Local Cart:', this.cartItems);
-  }
-}
-
-  
-  
-
-  removeItem(bookId: string) {
     if (this.userService.getToken()) {
-      this.cartService.removeFromBackendCart(bookId).subscribe(
-        () => {
-          this.loadCart(); // Reload the cart from the backend
+      // If user is logged in, get cart from backend
+      this.isLoading = true;
+      this.cartService.getBackendCart().subscribe({
+        next: (backendCart) => {
+          this.cartItems = backendCart;
+          this.isLoading = false;
         },
-        error => {
-          console.error('Error removing item from cart:', error);
-          this.errorMessage = 'Failed to remove item. Please try again.';
+        error: (error) => {
+          console.error('Error loading cart:', error);
+          this.errorMessage = 'Failed to load cart';
+          this.isLoading = false;
         }
-      );
+      });
+    } else {
+      // If user is not logged in, get cart from localStorage
+      this.cartItems = this.cartService.getLocalCart();
+      console.log("local cart",this.cartItems)
+    }
+  }
+
+  private syncCartsAndUpdate(localCart: any[]): void {  ///////////////////////
+    this.cartService.syncBackendCartWithLocal().subscribe({
+      next: () => {
+        // After syncing to backend, reload the final state
+        this.cartService.getBackendCart().subscribe({
+          next: (finalBackendCart) => {
+            this.cartService.syncLocalCartWithBackend(finalBackendCart);
+            this.cartItems = [...this.cartService.getCart()];
+            this.isLoading = false;
+          },
+          error: (error) => {
+            console.error('Error loading final cart state:', error);
+            this.errorMessage = 'Failed to load final cart state. Please refresh the page.';
+            this.isLoading = false;
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error syncing carts:', error);
+        this.errorMessage = 'Failed to sync cart. Please try again.';
+        this.isLoading = false;
+      }
+    });
+  }
+
+
+
+  
+  
+
+  
+  
+
+  removeItem(bookId: string): void {
+    if (this.userService.getToken()) {
+      this.isLoading = true;
+      this.cartService.removeFromBackendCart(bookId).subscribe({
+        next: () => {
+          this.loadCart();
+        },
+        error: (error) => {
+          console.error('Error removing item:', error);
+          this.errorMessage = 'Failed to remove item';
+          this.isLoading = false;
+        }
+      });
     } else {
       this.cartService.removeFromCart(bookId);
-      this.cartItems = [...this.cartService.getCart()];
+      this.loadCart();
     }
   }
 
 
-  updateQuantity(item: any, newQuantity: number) {
+  updateQuantity(item: any, newQuantity: number): void {
     if (newQuantity < 1) return;
 
     if (this.userService.getToken()) {
-      this.cartService.updateBackendCartItemQuantity(item._id, newQuantity).subscribe(
-        () => {
-          this.loadCart(); // Reload the cart from the backend
+      this.isLoading = true;
+      this.cartService.updateBackendCartItemQuantity(item._id, newQuantity).subscribe({
+        next: () => {
+          this.loadCart();
         },
-        error => {
+        error: (error) => {
           console.error('Error updating quantity:', error);
-          this.errorMessage = 'Failed to update quantity. Please try again.';
+          this.errorMessage = 'Failed to update quantity';
+          this.isLoading = false;
         }
-      );
+      });
     } else {
-      item.quantity = newQuantity;
-      this.cartService.addToCart(item, 0); // Update local cart
-      this.cartItems = this.cartService.getCart();
+      this.cartService.updateLocalCartItem(item._id, newQuantity);
+      this.loadCart();
     }
   }
-
-
   increaseQuantity(item: any) {
     if (this.userService.getToken()) {
       this.cartService.updateBackendCartItemQuantity(item._id, item.quantity + 1).subscribe(
         () => {
-          this.loadCart(); // Reload the cart from the backend
+          this.loadCart();
         },
         error => {
           console.error('Error increasing quantity:', error);
@@ -112,18 +134,17 @@ export class CartComponent implements OnInit{
         }
       );
     } else {
-      item.quantity++;
-      this.cartService.addToCart(item, 0);
+      this.cartService.updateLocalCartItem(item._id, item.quantity + 1);
       this.cartItems = [...this.cartService.getCart()];
     }
-  }
+}
 
-  decreaseQuantity(item: any) {
+decreaseQuantity(item: any) {
     if (item.quantity > 1) {
       if (this.userService.getToken()) {
         this.cartService.updateBackendCartItemQuantity(item._id, item.quantity - 1).subscribe(
           () => {
-            this.loadCart(); // Reload the cart from the backend
+            this.loadCart();
           },
           error => {
             console.error('Error decreasing quantity:', error);
@@ -131,44 +152,48 @@ export class CartComponent implements OnInit{
           }
         );
       } else {
-        item.quantity--;
-        this.cartService.addToCart(item, 0);
+        this.cartService.updateLocalCartItem(item._id, item.quantity - 1);
         this.cartItems = [...this.cartService.getCart()];
       }
     }
-  }
+}
   
 
-  placeOrder(): void {
-    if (this.userService.getToken()) {
-      // User is logged in, proceed with order placement
-      console.log('Placing order...');
-      // Implement order placement logic here
-    } else {
-      // User is not logged in, open login/register dialog
-      this.openLoginRegisterDialog();
+placeOrder(): void {
+  if (!this.userService.getToken()) {
+    this.openLoginDialog();
+    return;
+  }
+
+  this.router.navigate(['/contact']);
+}
+
+private openLoginDialog(): void {
+  const dialogRef = this.dialog.open(LoginRegisterComponent, {
+    width: '400px',
+    disableClose: true
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result === 'success') {
+      this.isLoading = true;
+      
+      // Sync local cart to backend after successful login
+      this.cartService.syncLocalCartToBackend().pipe(
+        finalize(() => {
+          this.isLoading = false;
+          this.loadCart();
+          this.router.navigate(['/contact']);
+        })
+      ).subscribe({
+        error: (error) => {
+          console.error('Error syncing cart:', error);
+          this.errorMessage = 'Failed to sync cart';
+        }
+      });
     }
-  }
-
-  openLoginRegisterDialog(): void {
-    const dialogRef = this.dialog.open(LoginRegisterComponent, {
-      width: '400px',
-      disableClose: true // Prevents closing the dialog by clicking outside
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === 'success') {
-        
-        console.log('Login successful, proceeding with order placement');
-        this.loadCart();
-        this.router.navigate(['/contact']);
-      } else {
-        console.log('Login cancelled or failed');
-        // Optionally, you can show a message to the user here
-      }
-    });
-  }
-
+  });
+}
 
   proceedWithOrderPlacement(): void {
     // Implement your order placement logic here

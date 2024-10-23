@@ -1,7 +1,6 @@
-<!-- <app-cart></app-cart> -->
 <app-contact-details></app-contact-details>
 
-<div class="order-summary">
+<div class="order-summary" *ngIf="!errorMessage">
     <h2>Order Summary</h2>
     <div *ngFor="let item of orderItems" class="order-item">
       <img [src]="item.bookImage" [alt]="item.bookName" class="book-image">
@@ -16,7 +15,11 @@
       </div>
     </div>
     <div class="total">
-      <p>Total: ₹{{ calculateTotal() }}</p>
+      <p>Total: ₹{{ totalDiscountPrice }}</p>
     </div>
-    <button class="checkout-button" (click)="checkout()">Proceed to Checkout</button>
-  </div>
+    <button class="checkout-button" (click)="checkout()">Place Order</button>
+</div>
+
+<div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+</div>

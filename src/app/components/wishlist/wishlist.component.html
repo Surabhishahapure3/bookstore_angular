@@ -1,0 +1,43 @@
+<!-- wishlist.component.html -->
+<div class="wishlist-container">
+    <div class="wishlist-header">
+      <h2>My Wishlist ({{ wishlistItems.length }})</h2>
+    </div>
+  
+    <div class="wishlist-items" *ngIf="wishlistItems.length > 0; else emptyWishlist">
+      <div class="wishlist-item" *ngFor="let item of wishlistItems">
+        <div class="item-image">
+          <img [src]="item.bookImage" [alt]="item.bookName">
+        </div>
+        <div class="item-details">
+          <h3>{{ item.bookName }}</h3>
+          <p class="author">by {{ item.author }}</p>
+          <div class="price-section">
+            <span class="discounted-price">Rs. {{ item.discountPrice }}</span>
+            <span class="original-price">Rs. {{ item.price }}</span>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button 
+            class="add-to-cart"
+            (click)="addToCart(item)"
+            [disabled]="isInCart(item._id)"
+          >
+            {{ isInCart(item._id) ? 'Added to Cart' : 'Add to Cart' }}
+          </button>
+          <button 
+            class="remove-wishlist"
+            (click)="removeFromWishlist(item._id)"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <ng-template #emptyWishlist>
+      <div class="empty-wishlist">
+        <p>Your wishlist is empty</p>
+      </div>
+    </ng-template>
+  </div>

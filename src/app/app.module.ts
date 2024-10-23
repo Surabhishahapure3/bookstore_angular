@@ -17,6 +17,7 @@ import { CartComponent } from './components/cart/cart.component';
 import { LoginRegisterComponent } from './components/login-register/login-register.component';
 import { ContactDetailsComponent } from './components/contact-details/contact-details.component';
 import { OrderComponent } from './components/order/order.component';
+import { WishlistComponent } from './components/wishlist/wishlist.component';
 
 
 @NgModule({
@@ -29,6 +30,7 @@ import { OrderComponent } from './components/order/order.component';
     LoginRegisterComponent,
     ContactDetailsComponent,
     OrderComponent,
+    WishlistComponent
     
     
   ],
