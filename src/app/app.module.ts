@@ -39,7 +39,7 @@ import { OrderSummaryComponent } from './components/order-summary/order-summary.
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule,
+    AppRoutingModule,  
     BrowserAnimationsModule,
     HttpClientModule,
     MatIconModule,
