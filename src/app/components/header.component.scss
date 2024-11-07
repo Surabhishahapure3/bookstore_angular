@@ -1,0 +1,67 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #8B2A2A; // Matches the background color from your image
+    padding: 10px 20px;
+    color: white;
+
+    .logo {
+        display: flex;
+        align-items: center;
+
+        img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+    }
+
+    .search-bar {
+        display: flex;
+        align-items: center;
+        background-color: white;
+        padding: 5px;
+        border-radius: 5px;
+        flex-grow: 1;
+        margin: 0 20px;
+        max-width: 500px;
+
+        mat-icon {
+            color: #8B2A2A;
+            margin-right: 10px;
+        }
+
+        input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 16px;
+        }
+    }
+
+    .profileNcart {
+        display: flex;
+        gap: 20px;
+
+        .profile, .cart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+
+            mat-icon {
+                font-size: 24px;
+            }
+
+            span {
+                font-size: 14px;
+            }
+        }
+    }
+}

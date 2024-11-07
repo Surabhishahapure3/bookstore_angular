@@ -1,0 +1,27 @@
+<app-components></app-components>
+<h1>Books</h1><br>
+<div class="book-container">
+    
+    <div class="book" *ngFor="let book of books" (click)="onBookClick(book._id)">
+        <!-- <h3 (click)="onBookClick(book.id)">{{book.title}}</h3> -->
+         
+        <div class="half">
+      <div class="book-img">
+        <img *ngIf="book.bookImage; else noImage" [src]="book.bookImage" alt="{{ book.title }}">
+        <ng-template #noImage>
+          <img src="path/to/default/image.jpg" alt="No Image Available"> 
+        </ng-template>
+      </div>
+    </div>
+     
+      <div class="book-details">
+        <h4>{{ book.bookName }}</h4>
+        <p>{{ book.author }}</p>
+        <div class="price-rating">
+          <span>Rs. {{ book.price }}</span> 
+          <span class="discount">Rs. {{book.discountPrice}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  

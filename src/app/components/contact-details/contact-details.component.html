@@ -1,0 +1,49 @@
+<app-cart></app-cart>
+
+<div class="customer-details">
+    <div class="header">
+      <h2>Customer Details</h2>
+      <button class="add-address" >Add New Address</button>
+    </div>
+  
+    <div class="form-group">
+      <div class="input-group">
+        <label for="fullName">Full Name</label>
+        <input id="fullName" type="text" >
+      </div>
+      <div class="input-group">
+        <label for="mobileNumber">Mobile Number</label>
+        <input id="mobileNumber" type="text">
+      </div>
+    </div>
+  
+    <div class="address work">
+      <h3>
+        <span class="number">1.</span>WORK
+        <button class="edit" >Edit</button>
+      </h3>
+      <div class="address-details">
+        <p></p>
+        <div class="form-group">
+          <div class="input-group">
+            <label for="workCity">City/Town</label>
+            <input id="workCity" type="text">
+          </div>
+          <div class="input-group">
+            <label for="workState">State</label>
+            <input id="workState" type="text">
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="address home">
+      <h3><span class="number">2.</span>Home</h3>
+      <div class="address-details">
+        <p>Address</p>
+        <p></p>
+      </div>
+    </div>
+  
+    <button class="continue" (click)="continue()">CONTINUE</button>
+  </div>

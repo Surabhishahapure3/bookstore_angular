@@ -1,0 +1,36 @@
+<div class="cart-container">
+    <h2>My Cart ({{ cartItems.length }})</h2>
+  
+    <div class="location">
+      <label for="location">Use current location</label>
+      <select id="location" name="location">
+        <option value="current">Use current location</option>
+        <!-- Additional location options can be added -->
+      </select>
+    </div>
+  
+    <div class="cart-item" *ngFor="let item of cartItems">
+      <div class="item-image">
+        <img [src]="item.bookImage" />
+      </div>
+      <div class="item-details">
+        <h2>{{ item.bookName }}</h2>
+        <p>by {{ item.author }}</p>
+        <div class="item-prices">
+          <span class="price">Rs. {{ item.price }}</span>
+          <span class="discount-price">Rs. {{ item.discountPrice }}</span>
+        </div>
+      </div>
+      <div class="item-actions">
+        <button id="decrease" class="decrement" (click)="decreaseQuantity(item)">-</button>
+        <input type="number" [(ngModel)]="item.quantity" min="1" />
+        <button id="increase" class="decrement" (click)="increaseQuantity(item)">+</button>
+        <button (click)="removeItem(item._id)">Remove</button>
+      </div>
+    </div>
+  
+    <div class="cart-footer">
+      <button class="place-order-btn" (click)="placeOrder()">Place Order</button>
+    </div>
+  </div>
+  

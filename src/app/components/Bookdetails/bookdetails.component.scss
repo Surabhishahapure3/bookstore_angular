@@ -1,0 +1,151 @@
+.book-details-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  
+    .breadcrumb {
+      margin-bottom: 20px;
+      color: #666;
+    }
+  
+    .book-content {
+      display: flex;
+      gap: 30px;
+    }
+
+    .quantity-control{
+        display: flex;
+        width: 3px;
+    }
+
+    .quantity{
+        // width: 20px;
+        height: 24px;
+        border: 1px solid black;
+        margin-top: 5px;
+        margin-left: 16px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 2px;
+    }
+
+    .decrement,.increment{
+        border-radius: 50%;
+        padding: 10px;
+    }
+
+    .increment{
+        margin-left: 16px;
+    }
+  
+    .book-image-section {
+      flex: 0 0 300px;
+  
+      img {
+        width: 100%;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      }
+  
+      .action-buttons {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+  
+        button {
+          padding: 10px;
+          border: none;
+          cursor: pointer;
+          font-weight: bold;
+        }
+  
+        .add-to-bag {
+          background-color: #8b0000;
+          color: white;
+        }
+  
+        .wishlist {
+          background-color: #333;
+          color: white;
+        }
+      }
+    }
+  
+    .book-info-section {
+      flex: 1;
+    //   height: ;
+  
+      .book-title {
+        font-size: 24px;
+        margin-bottom: 5px;
+      }
+  
+      .book-author {
+        color: #666;
+        margin-bottom: 10px;
+      }
+  
+      .rating {
+        margin-bottom: 15px;
+  
+        .stars {
+          color: #4CAF50;
+          font-weight: bold;
+        }
+  
+        .review-count {
+          color: #666;
+        }
+      }
+  
+      .price-section {
+        margin-bottom: 20px;
+  
+        .discounted-price {
+          font-size: 20px;
+          font-weight: bold;
+          margin-right: 10px;
+        }
+  
+        .original-price {
+          text-decoration: line-through;
+          color: #666;
+        }
+      }
+  
+      .book-description, .customer-feedback {
+        margin-bottom: 30px;
+  
+        h2 {
+          font-size: 18px;
+          padding-top: -9px;
+        //   margin-bottom: px;
+        }
+
+        p{
+            font-size: 10px;
+        }
+      }
+  
+      .star-rating {
+        font-size: 24px;
+        color: #FFD700;
+        margin-bottom: 10px;
+      }
+  
+      textarea {
+        width: 100%;
+        height: 100px;
+        margin-bottom: 10px;
+      }
+  
+      .submit-review {
+        background-color: #237fb7;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+      }
+    }
+  }

@@ -1,0 +1,20 @@
+<div class="header">
+    <div class="logo">
+        <img src="assets/education.svg" alt="Education">
+        <h3>Bookstore</h3>
+    </div>
+    <div class="search-bar">
+        <mat-icon svgIcon="search-icon" aria-hidden="false" aria-label="search icon"></mat-icon>
+        <input type="text" placeholder="Search">
+    </div>
+    <div class="profileNcart">
+        <div class="profile">
+            <mat-icon svgIcon="profile-icon" aria-hidden="false" aria-label="profile icon"></mat-icon>
+            <span>Profile</span>
+        </div>
+        <div class="cart" (click) = "cartList()">
+            <mat-icon svgIcon="cart-icon" aria-hidden="false" aria-label="cart icon"></mat-icon>
+            <span>Cart</span>
+        </div>
+    </div>
+</div>

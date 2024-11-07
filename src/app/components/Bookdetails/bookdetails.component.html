@@ -1,0 +1,58 @@
+<app-components></app-components>
+
+<div class="book-details-container" *ngIf="bookDetails; else loading">
+    <div class="breadcrumb">
+      Home / Book(01)
+    </div>
+    <div class="book-content">
+      <div class="book-image-section">
+        <img [src]="bookDetails.bookImage" alt="Book cover">
+        <div class="action-buttons">
+            <ng-container>
+                <button class="add-to-bag" (click)="addToBag()" *ngIf="!isInBag">ADD TO BAG</button>
+              </ng-container>
+              
+                <div class="quantity-control" *ngIf="isInBag">
+                  <button (click)="decrementQuantity()">-</button>
+                  <span>{{ quantityToBuy }}</span>
+                  <button (click)="incrementQuantity()">+</button>
+                  <!-- <button>Go to Bag</button> -->
+                </div>
+              
+              <button class="btn wishlist" (click)="toggleWishlist()">
+                {{ isInWishlist ? 'Added to Wishlist' : 'Add to Wishlist' }}
+              </button>
+        </div>
+      </div>
+      <div class="book-info-section">
+        <h1 class="book-title">{{ bookDetails.bookName }}</h1>
+        <p class="book-author">by {{ bookDetails.author }}</p>
+        <div class="rating">
+          <span class="stars">{{ bookDetails.rating }} ★</span>
+          <span class="review-count">({{ bookDetails.reviewCount }})</span>
+        </div>
+        <div class="price-section">
+          <span class="discounted-price">Rs.{{ bookDetails.discountPrice }}</span>
+          <span class="original-price">Rs.{{ bookDetails.price }}</span>
+        </div>
+        <div class="book-description">
+          <h2>Book Detail</h2>
+          <p>{{ bookDetails.description }}</p>
+        </div>
+        <div class="customer-feedback">
+          <h2>Customer Feedback</h2>
+          <p>Overall rating</p>
+          <div class="star-rating">
+            ☆☆☆☆☆
+          </div>
+          <textarea placeholder="Write your review"></textarea>
+          <button class="submit-review">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <ng-template #loading>
+    <p>Loading page...</p>
+  </ng-template>
+  

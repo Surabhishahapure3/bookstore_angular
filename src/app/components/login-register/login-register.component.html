@@ -1,0 +1,58 @@
+<div class="auth-wrapper">
+<div class="auth-container">
+    <div class="image-section">
+      <img src='assets/2766594.png' alt="Online Book Shopping" />
+      <h3>ONLINE BOOK SHOPPING</h3>
+    </div>
+  
+    <div class="form-section">
+      <div class="form-header">
+        <span (click)="toggleForm('login')" [class.active]="isLogin">LOGIN</span>
+        <span (click)="toggleForm('signup')" [class.active]="!isLogin">SIGNUP</span>
+      </div>
+  
+      <div *ngIf="isLogin">
+        <!-- Login Form -->
+        <form (ngSubmit)="onLoginSubmit()">
+          <label for="email">Email Id</label>
+          <input type="email" id="email" [(ngModel)]="loginData.email" name="email" required />
+          
+          <label for="password">Password</label>
+          <input type="password" id="password" [(ngModel)]="loginData.password" name="password" required />
+          
+          <a href="#">Forgot Password?</a>
+          
+          <button type="submit">Login</button>
+        </form>
+      </div>
+  
+      <div *ngIf="!isLogin">
+        <!-- Signup Form -->
+        <form (ngSubmit)="onSignupSubmit()">
+            <label for="name">Full Name</label>
+            <input type="text" [(ngModel)]="signupData.name" name="name" required>
+    
+            <label for="email">Email Id</label>
+            <input type="email" id="email" [(ngModel)]="signupData.email" name="email" required />
+    
+            <label for="password">Password</label>
+            <input type="password" id="password" [(ngModel)]="signupData.password" name="password" required />
+    
+            <label for="number">Mobile Number</label>
+            <input type="text" id="number" [(ngModel)]="signupData.number" name="number" required>
+          
+          <button type="submit">Signup</button>
+        </form>
+    </div>
+    
+  
+      <div class="social-login">
+        <span>OR</span>
+        <button (click)="loginWith('facebook')">Facebook</button>
+        <button (click)="loginWith('google')">Google</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+  

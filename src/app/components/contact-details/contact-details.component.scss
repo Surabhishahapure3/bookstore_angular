@@ -1,0 +1,84 @@
+.customer-details {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+  
+      h2 {
+        margin: 0;
+      }
+  
+      .add-address {
+        padding: 5px 10px;
+        color: #ff0000;
+        border: 1px solid #ff0000;
+        background: none;
+        cursor: pointer;
+      }
+    }
+  
+    .form-group {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+  
+      .input-group {
+        flex: 1;
+  
+        label {
+          display: block;
+          margin-bottom: 5px;
+        }
+  
+        input {
+          width: 100%;
+          padding: 5px;
+          border: 1px solid #ccc;
+          background-color: #f0f0f0;
+        }
+      }
+    }
+  
+    .address {
+      margin-bottom: 20px;
+  
+      h3 {
+        display: flex;
+        align-items: center;
+  
+        .number {
+          color: #ff0000;
+          margin-right: 5px;
+        }
+  
+        .edit {
+          margin-left: 10px;
+          color: #0000ff;
+          background: none;
+          border: none;
+          cursor: pointer;
+        }
+      }
+  
+      .address-details {
+        background-color: #f0f0f0;
+        padding: 10px;
+      }
+    }
+  
+    .continue {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #0000ff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  }
