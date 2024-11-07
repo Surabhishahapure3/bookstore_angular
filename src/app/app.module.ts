@@ -45,7 +45,7 @@ import { OrderSummaryComponent } from './components/order-summary/order-summary.
     MatIconModule,
     MatSnackBarModule,
     FormsModule,
-    MatDialogModule,
+    MatDialogModule,   
     ReactiveFormsModule
   ],
   providers: [],

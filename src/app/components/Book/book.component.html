@@ -10,7 +10,7 @@
         <img *ngIf="book.bookImage; else noImage" [src]="book.bookImage" alt="{{ book.title }}">
         <ng-template #noImage>
           <img [src]="getFallbackImage(book)" alt="No Image Available">
-        </ng-template>
+        </ng-template>   
       </div>
     </div>
         
