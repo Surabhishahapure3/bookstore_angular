@@ -1,6 +1,12 @@
 h1{
+    display: flex;
     position: absolute;
     left: 195px;
+}
+
+h1 p{
+  color: gray;
+  font-size: 15px;
 }
 .book-container {
     display: grid;

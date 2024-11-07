@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, forkJoin } from 'rxjs';
+import { Observable, of, forkJoin, BehaviorSubject} from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { tap, catchError, map, switchMap } from 'rxjs/operators';
 import { UserServiceService } from '../user-service/user-service.service';
@@ -11,6 +11,8 @@ export class CartServiceService {
   private cart: any[] = [];
   private wishlist: any[] = [];
   private wishlistItems: any[] = [];
+  private cartSubject = new BehaviorSubject<any[]>([]);
+  cart$ = this.cartSubject.asObservable();
   private readonly CART_STORAGE_KEY = 'localCart';
   private baseUrl = 'http://localhost:3000/api/v1/wishlist';
   private apiUrl = 'http://localhost:3000/api/v1/cart/';
@@ -45,6 +47,7 @@ export class CartServiceService {
   updateBackendCart(bookId: string, quantity: number):Observable<any>{
     return this.http.post<any>(`${this.apiUrl}/updatequantity`,{bookId,quantity},{headers:this.getHeaders()})
   }
+
   addToCart(book: any, quantity: number = 1): void {
     const currentCart = this.getLocalCart();
     const existingItem = currentCart.find(item => item._id === book._id);
@@ -241,25 +244,34 @@ private updateOrAddToBackendCart(item: any): Observable<any> {
     };
   }
 
-  updateLocalCartItem(bookId: string, quantity: number): void {
-    const currentCart = this.getLocalCart();
-    const itemIndex = currentCart.findIndex(item => item._id === bookId);
+  updateLocalCartItem(itemId: string, newQuantity: number) {
+    // Get current cart from local storage
+    const cart = this.getLocalCart();
     
-    if (itemIndex !== -1) {
-      currentCart[itemIndex].quantity = quantity;
-      this.saveCartToStorage(currentCart);
-    }
+    // Find and update the item
+    const updatedCart = cart.map(cartItem => {
+      if (cartItem._id === itemId) {
+        return { ...cartItem, quantity: newQuantity };
+      }
+      return cartItem;
+    });
+  
+    // Save back to local storage
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+  
+    // Return the updated item
+    return updatedCart.find(item => item._id === itemId);
   }
   
 
 
   /*-----------------------------------------------------------------------------------------------------------------------------------------------*/
-  private loadCartFromStorage(): void {
+  private loadCartFromStorage(): void { //////////
     const storedCart = localStorage.getItem(this.CART_STORAGE_KEY);
     if (storedCart) {
       try {
         const parsedCart = JSON.parse(storedCart);
-        this.saveCartToStorage(parsedCart);
+        this.cartSubject.next(parsedCart);
       } catch (e) {
         console.error('Error parsing stored cart:', e);
         this.saveCartToStorage([]);
@@ -267,15 +279,24 @@ private updateOrAddToBackendCart(item: any): Observable<any> {
     }
   }
 
-  private saveCartToStorage(cart: any[]): void {
+  updateCartItemInBackend(itemId: string, quantity: number) {
+    return this.http.put(`${this.apiUrl}updatequantity`, {
+      itemId,
+      quantity
+    });
+  }
+
+  private saveCartToStorage(cart: any[]): void {/////////////////////
     localStorage.setItem(this.CART_STORAGE_KEY, JSON.stringify(cart));
+    this.cartSubject.next(cart);
   }
 
-  getLocalCart(): any[] {
+  getLocalCart(): any[] {//////////////////////
     const storedCart = localStorage.getItem(this.CART_STORAGE_KEY);
-    return storedCart ? JSON.parse(storedCart) : [];
+    const cart = storedCart ? JSON.parse(storedCart) : [];
+    this.cartSubject.next(cart);
+    return cart;
   }
-
 
   syncLocalCartToBackend(): Observable<any> {
     const localCart = this.getLocalCart();
@@ -293,7 +314,7 @@ private updateOrAddToBackendCart(item: any): Observable<any> {
     return forkJoin(syncOperations).pipe(
       tap(() => {
         // Clear local storage after successful sync
-        localStorage.removeItem(this.CART_STORAGE_KEY);
+        this.clearLocalCart();
       })
     );
   }

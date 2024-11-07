@@ -1,0 +1,23 @@
+<div class="order-page">
+  <h3>Home / My Order</h3>
+
+  <div *ngFor="let order of orderDetails" class="order-container">
+    <div class="order-item" *ngFor="let item of order.books">
+      <div class="book-image-container">
+        <img [src]="item.bookImage" alt="Book Image" class="book-image" />
+      </div>
+      <div class="book-details">
+        <h4>{{ item.bookName }}</h4>
+        <p class="author">by {{ item.author }}</p>
+        <p class="price">
+          Rs. {{ item.price }}
+          <span class="original-price">Rs. {{ item.discountPrice }}</span>
+        </p>
+      </div>
+      <div class="order-info">
+        <p *ngIf="order.orderStatus" class="order-status completed">● Order Placed</p>
+        <p class="order-date">Order Placed on {{ order.createdAt | date: 'MMM dd' }}</p>
+      </div>
+    </div>
+  </div>
+</div>

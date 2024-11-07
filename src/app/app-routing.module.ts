@@ -8,6 +8,7 @@ import { LoginRegisterComponent } from './components/login-register/login-regist
 import { ContactDetailsComponent } from './components/contact-details/contact-details.component';
 import { OrderComponent } from './components/order/order.component';
 import { WishlistComponent } from './components/wishlist/wishlist.component';
+import { OrderSummaryComponent } from './components/order-summary/order-summary.component';
 
 const routes: Routes = [
   {
@@ -41,6 +42,10 @@ const routes: Routes = [
   {
     path:'wishlist',
     component:WishlistComponent
+  },
+  {
+    path:'order-confirmation',
+    component:OrderSummaryComponent
   }
 ];
 

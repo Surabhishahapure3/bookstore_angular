@@ -7,6 +7,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
+import { ReactiveFormsModule } from '@angular/forms';
 //components
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './components/header.component';
@@ -18,6 +19,7 @@ import { LoginRegisterComponent } from './components/login-register/login-regist
 import { ContactDetailsComponent } from './components/contact-details/contact-details.component';
 import { OrderComponent } from './components/order/order.component';
 import { WishlistComponent } from './components/wishlist/wishlist.component';
+import { OrderSummaryComponent } from './components/order-summary/order-summary.component';
 
 
 @NgModule({
@@ -30,7 +32,8 @@ import { WishlistComponent } from './components/wishlist/wishlist.component';
     LoginRegisterComponent,
     ContactDetailsComponent,
     OrderComponent,
-    WishlistComponent
+    WishlistComponent,
+    OrderSummaryComponent
     
     
   ],
@@ -42,7 +45,8 @@ import { WishlistComponent } from './components/wishlist/wishlist.component';
     MatIconModule,
     MatSnackBarModule,
     FormsModule,
-    MatDialogModule
+    MatDialogModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

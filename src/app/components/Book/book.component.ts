@@ -60,6 +60,25 @@ this.router.navigate([navigationUrl], { state: { book: bookDetails } }).then(suc
       console.error('Invalid book ID:', bookId);
     }
   }
+
+  getFallbackImage(book: any): string {
+    if (book.bookName === 'Data Structures') {
+      return 'assets/data structure.jpg';
+    } else if (book.bookName === 'Design Patterns') {
+      return 'assets/Image 36.png';
+    } else if (book.bookName === 'Algorithms') {
+      return 'assets/Image 12.png';
+    }else if (book.bookName === 'EMC2') {
+      return 'assets/Image 10.png';
+    }
+    else if (book.bookName === 'Jumping Jack') {
+      return 'assets/Image 7.png';
+    }
+
+    // Default fallback image
+    return 'assets/image.png';
+  }
+  
   
 
   }

@@ -72,5 +72,22 @@ export class BookdetailsComponent implements OnInit {
     this.quantityToBuy++;
   }
 
+  getFallbackImage(book: any): string {
+    if (this.bookDetails.bookName === 'Data Structures') {
+      return 'assets/data structure.jpg';
+    } else if (this.bookDetails.bookName === 'Design Patterns') {
+      return 'assets/Image 36.png';
+    } else if (this.bookDetails.bookName === 'Algorithms') {
+      return 'assets/Image 12.png';
+    }else if (this.bookDetails.bookName === 'EMC2') {
+      return 'assets/Image 10.png';
+    }
+    else if (this.bookDetails.bookName === 'Jumping Jack') {
+      return 'assets/Image 7.png';
+    }
+
+    // Default fallback image
+    return 'assets/image.png';
+  }
   
 }

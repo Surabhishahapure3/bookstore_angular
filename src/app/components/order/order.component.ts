@@ -42,7 +42,7 @@ export class OrderComponent implements OnInit {
       (error) => {
         console.error('Error fetching cart items:', error);
         this.errorMessage = 'Unable to fetch cart items. Please try again later.';
-        this.orderItems = [];
+        // this.orderItems = [];
         this.calculateTotals();
       }
     );
@@ -53,38 +53,36 @@ export class OrderComponent implements OnInit {
     this.totalDiscountPrice = this.orderItems.reduce((total, item) => total + (item.discountPrice * item.quantity), 0);
   }
 
-  checkout(): void {
-    if (!this.isLoggedIn) {
-      this.router.navigate(['/login']);
-      return;
-    }
+  orderResponse: any;  // Define a variable to store the order response
 
-    this.cartService.createOrder().subscribe(
-      (response) => {
-        if (response.code === 201) {
-          console.log('Order created successfully:', response.data);
-          this.cartService.getAllOrders().subscribe(
-            (orderResponse) => {
-              if (orderResponse.code === 200) {
-                this.orderItems = orderResponse.data;
-                this.calculateTotals();
-                // Clear the cart after successful order creation
-                this.cartService.syncLocalCartWithBackend([]);
-                // Navigate to a confirmation page or the next step in your checkout process
-                this.router.navigate(['/order-confirmation']);
-              }
-            },
-            (error) => {
-              console.error('Error fetching orders:', error);
-              this.errorMessage = 'Error fetching order details. Please try again.';
-            }
-          );
-        }
-      },
-      (error) => {
-        console.error('Error creating order:', error);
-        this.errorMessage = 'Error creating order. Please try again.';
-      }
-    );
+checkout(): void {
+  if (!this.isLoggedIn) {
+    this.router.navigate(['/login']);
+    return;
   }
+
+  const token = this.userService.getToken();
+  if (!token) {
+    this.router.navigate(['/login']);
+    this.errorMessage = 'You need to be logged in to place an order.';
+    return;
+  }
+
+  // Call the createOrder method from cartService and store the response
+  this.cartService.createOrder().subscribe(
+    (response) => {
+      this.orderResponse = response; // Store the response in a variable
+      console.log("Order has been placed:", this.orderResponse);
+
+      
+     
+    },
+    (error) => {
+      console.error("Error placing order:", error);
+      this.errorMessage = 'Error placing order. Please try again.';
+    }
+  );
+}
+
+    
 }

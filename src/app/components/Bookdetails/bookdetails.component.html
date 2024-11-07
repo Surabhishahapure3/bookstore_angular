@@ -4,9 +4,14 @@
     <div class="breadcrumb">
       Home / Book(01)
     </div>
+    
+    
     <div class="book-content">
       <div class="book-image-section">
-        <img [src]="bookDetails.bookImage" alt="Book cover">
+        <img *ngIf="bookDetails.bookImage; else noImage" [src]="bookDetails.bookImage" alt="{{ bookDetails.title }}">
+        <ng-template #noImage>
+          <img [src]="getFallbackImage(bookDetails)" alt="No Image Available">
+        </ng-template>
         <div class="action-buttons">
             <ng-container>
                 <button class="add-to-bag" (click)="addToBag()" *ngIf="!isInBag">ADD TO BAG</button>

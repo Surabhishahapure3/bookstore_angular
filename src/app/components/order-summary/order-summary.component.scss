@@ -1,0 +1,78 @@
+.order-page {
+    padding: 20px;
+  }
+  
+  .order-page h3 {
+    color: #777;
+    font-weight: 400;
+    font-size: 14px;
+  }
+  
+  .order-container {
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .order-item {
+    display: flex;
+    width: 100%;
+  }
+  
+  .book-image-container {
+    margin-right: 20px;
+  }
+  
+  .book-image {
+    width: 80px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .book-details {
+    flex-grow: 1;
+  }
+  
+  .book-details h4 {
+    font-size: 18px;
+    margin: 0;
+  }
+  
+  .author {
+    color: #666;
+    font-size: 14px;
+    margin: 4px 0;
+  }
+  
+  .price {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .original-price {
+    font-size: 14px;
+    color: #b0b0b0;
+    text-decoration: line-through;
+    margin-left: 8px;
+  }
+  
+  .order-info {
+    text-align: right;
+  }
+  
+  .order-status {
+    color: green;
+    font-size: 14px;
+  }
+  
+  .order-date {
+    color: #666;
+    font-size: 14px;
+  }
+  

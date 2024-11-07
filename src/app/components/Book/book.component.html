@@ -1,5 +1,5 @@
 <app-components></app-components>
-<h1>Books</h1><br>
+<h1>Books <p> ({{ books.length }} items) </p></h1><br>
 <div class="book-container">
     
     <div class="book" *ngFor="let book of books" (click)="onBookClick(book._id)">
@@ -9,7 +9,7 @@
       <div class="book-img">
         <img *ngIf="book.bookImage; else noImage" [src]="book.bookImage" alt="{{ book.title }}">
         <ng-template #noImage>
-          <img src="path/to/default/image.jpg" alt="No Image Available"> 
+          <img [src]="getFallbackImage(book)" alt="No Image Available">
         </ng-template>
       </div>
     </div>

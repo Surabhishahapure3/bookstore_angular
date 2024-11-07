@@ -43,19 +43,20 @@ export class CartComponent implements OnInit{
         }
       });
     } else {
-      // If user is not logged in, get cart from localStorage
+      
       this.cartItems = this.cartService.getLocalCart();
       console.log("local cart",this.cartItems)
     }
   }
 
-  private syncCartsAndUpdate(localCart: any[]): void {  ///////////////////////
+  private syncCartsAndUpdate(localCart: any[]): void {  
     this.cartService.syncBackendCartWithLocal().subscribe({
       next: () => {
         // After syncing to backend, reload the final state
         this.cartService.getBackendCart().subscribe({
           next: (finalBackendCart) => {
-            this.cartService.syncLocalCartWithBackend(finalBackendCart);
+            const final = this.cartService.syncLocalCartWithBackend(finalBackendCart);
+            console.log("finalBackendCart",finalBackendCart)
             this.cartItems = [...this.cartService.getCart()];
             this.isLoading = false;
           },
@@ -119,54 +120,38 @@ export class CartComponent implements OnInit{
       });
     } else {
       this.cartService.updateLocalCartItem(item._id, newQuantity);
-      this.loadCart();
+      // this.loadCart();
     }
   }
-  increaseQuantity(item: any) {
-    if (this.userService.getToken()) {
-      this.cartService.updateBackendCartItemQuantity(item._id, item.quantity + 1).subscribe(
-        () => {
-          this.loadCart();
-        },
-        error => {
-          console.error('Error increasing quantity:', error);
-          this.errorMessage = 'Failed to update quantity. Please try again.';
-        }
-      );
+  increaseQuantity(item: any): void {
+    if (!this.userService.getToken()) {
+      const update = this.cartService.updateLocalCartItem(item._id, item.quantity + 1);
+      console.log("updated quantity",update)
     } else {
-      this.cartService.updateLocalCartItem(item._id, item.quantity + 1);
-      this.cartItems = [...this.cartService.getCart()];
+      this.updateQuantity(item, item.quantity + 1);
     }
-}
+  }
 
-decreaseQuantity(item: any) {
+  decreaseQuantity(item: any): void {
     if (item.quantity > 1) {
-      if (this.userService.getToken()) {
-        this.cartService.updateBackendCartItemQuantity(item._id, item.quantity - 1).subscribe(
-          () => {
-            this.loadCart();
-          },
-          error => {
-            console.error('Error decreasing quantity:', error);
-            this.errorMessage = 'Failed to update quantity. Please try again.';
-          }
-        );
-      } else {
+      if (!this.userService.getToken()) {
         this.cartService.updateLocalCartItem(item._id, item.quantity - 1);
-        this.cartItems = [...this.cartService.getCart()];
+      } else {
+        this.updateQuantity(item, item.quantity - 1);
       }
     }
-}
+  }
   
 
-placeOrder(): void {
-  if (!this.userService.getToken()) {
-    this.openLoginDialog();
-    return;
+  placeOrder(): void {
+    if (!this.userService.getToken()) {
+      this.openLoginDialog();
+      return;
+    }
+  
+    this.router.navigate(['/contact']);
   }
-
-  this.router.navigate(['/contact']);
-}
+  
 
 private openLoginDialog(): void {
   const dialogRef = this.dialog.open(LoginRegisterComponent, {
